@@ -1,32 +1,41 @@
 /** @odoo-module **/
 
-import { Component, useState, onMounted, useRef } from "@odoo/owl";
+import { Component, useState, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import {session} from "../../../../web/static/src/session";
 
 export class ChatWidget extends Component {
     setup() {
         this.rpc = useService("rpc");
         this.bus = useService("bus_service");
-        this.typingTimeout = null;
-        this.inputRef = useRef("chatInput");
-
         this.state = useState({
+            sessions: [],
+            currentSessionId: null,
             messages: [],
             newMessage: "",
-            typingUser: null,
-            user: session.user_id
+            user: odoo.session_info.user_id
         });
 
         onMounted(() => {
-            this.loadMessages();
+            this.loadSessions();
             this.listenForNewMessages();
-            this.listenForTyping();
         });
     }
 
-    async loadMessages() {
-        let result = await this.rpc("/chat/messages/1");  // Hardcoded session_id for now
+    async loadSessions() {
+        let result = await this.rpc("/chat/sessions");
+        if (result.success) {
+            this.state.sessions = result.sessions;
+            if (result.sessions.length > 0) {
+                this.selectSession(result.sessions[0].id);
+            }
+        }
+    }
+
+    async selectSession(sessionId) {
+        this.state.currentSessionId = sessionId;
+        this.state.messages = [];
+
+        let result = await this.rpc(`/chat/messages/${sessionId}`);
         if (result.success) {
             this.state.messages = result.messages;
         }
@@ -34,41 +43,24 @@ export class ChatWidget extends Component {
 
     async sendMessage(event) {
         if (event.type === "keydown" && event.key !== "Enter") return;
+        if (!this.state.currentSessionId) return;
 
         let message = this.state.newMessage.trim();
         if (!message) return;
 
-        let result = await this.rpc("/chat/send", { session_id: 1, message: message });
+        let result = await this.rpc("/chat/send", { session_id: this.state.currentSessionId, message: message });
         if (result.success) {
-            this.state.newMessage = "";  // Clear input
-            this.state.typingUser = null;  // Hide typing indicator
+            this.state.newMessage = "";
         }
     }
 
-    async notifyTyping() {
-        // Clear previous timeout to prevent spam
-        clearTimeout(this.typingTimeout);
-
-        // Send typing event to server
-        await this.rpc("/chat/typing", { session_id: 1 });
-
-        // Hide typing indicator after 3 seconds of inactivity
-        this.typingTimeout = setTimeout(() => {
-            this.state.typingUser = null;
-        }, 3000);
-    }
-
     listenForNewMessages() {
-        this.bus.addChannel("customer.chat.session_1");  // Hardcoded session_id for now
+        this.bus.addChannel("customer.chat.session_" + this.state.currentSessionId);
         this.bus.start();
         this.bus.on("new_message", "chat_widget", (data) => {
-            this.state.messages.push(data);
-        });
-    }
-
-    listenForTyping() {
-        this.bus.on("user_typing", "chat_widget", (data) => {
-            this.state.typingUser = data.user;
+            if (data.session_id === this.state.currentSessionId) {
+                this.state.messages.push(data);
+            }
         });
     }
 }

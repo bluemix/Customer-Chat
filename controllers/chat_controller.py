@@ -2,28 +2,42 @@
 from odoo import http
 from odoo.http import request
 
+
 class ChatController(http.Controller):
+
+    @http.route('/chat/start', type='json', auth='user')
+    def start_chat(self, customer_id):
+        """Start or retrieve an existing chat session for the customer"""
+        session = request.env['customer.chat.session'].sudo().create_session(customer_id)
+        return {"success": True, "session_id": session.id}
 
     @http.route('/chat/send', type='json', auth='user')
     def send_message(self, session_id, message):
-        """Send a message and trigger real-time updates"""
-        session = request.env['customer.chat.session'].browse(session_id)
+        """Send a message and assign an agent if not assigned"""
+        session = request.env['customer.chat.session'].sudo().browse(session_id)
         if session:
-            chat_msg = request.env['customer.chat.message'].create({
+            if not session.agent_id and request.env.user.has_group('base.group_user'):
+                session.agent_id = request.env.user.id  # Assign the agent on first response
+
+            chat_msg = request.env['customer.chat.message'].sudo().create({
                 'session_id': session_id,
                 'sender_id': request.env.user.id,
                 'message': message
             })
-            chat_msg.send_chat_message()  # Trigger real-time update
+            chat_msg.send_chat_message()
             return {"success": True, "message_id": chat_msg.id}
         return {"success": False, "error": "Invalid session"}
 
-    @http.route('/chat/typing', type='json', auth='user')
-    def user_typing(self, session_id):
-        """Notify other users that someone is typing"""
-        request.env['bus.bus']._sendone(
-            'customer.chat.session_%s' % session_id,
-            'user_typing',
-            {"session_id": session_id, "user": request.env.user.name}
-        )
-        return {"success": True}
+    @http.route('/chat/sessions', type='json', auth='user')
+    def get_sessions(self):
+        """Retrieve all active chat sessions"""
+        sessions = request.env['customer.chat.session'].sudo().search([('state', '=', 'open')])
+        return {
+            "success": True,
+            "sessions": [{
+                "id": session.id,
+                "name": session.name,
+                "customer_id": session.customer_id.id,
+                "customer_name": session.customer_id.name
+            } for session in sessions]
+        }
