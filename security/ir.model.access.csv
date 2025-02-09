@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_chat_session,Chat Session,model_customer_chat_session,,1,1,1,1
+access_chat_message,Chat Message,model_customer_chat_message,,1,1,1,1

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="customer_chat.ChatWidget" owl="1">
+        <div class="chat-widget">
+            <div class="chat-header">
+                <span>Customer Chat</span>
+                <button class="close-chat" t-on-click="toggleChat">×</button>
+            </div>
+            <div class="chat-body">
+                <t t-foreach="messages" t-as="msg" t-key="msg.id">
+                    <div t-att-class="'chat-message ' + ('sent' if msg.sender_id == user.id else 'received')">
+                        <span><t t-esc="msg.message"/></span>
+                    </div>
+                </t>
+                <div t-if="typingUser" class="typing-indicator">
+                    <t t-esc="typingUser"/> is typing...
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input ref="chatInput" type="text" t-model="newMessage"
+                    placeholder="Type a message..." t-on-keydown="sendMessage"
+                    t-on-input="notifyTyping"/>
+                <button class="send-btn" t-on-click="sendMessage">Send</button>
+            </div>
+        </div>
+    </t>
+</templates>
