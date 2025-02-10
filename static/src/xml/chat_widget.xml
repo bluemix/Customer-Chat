@@ -1,28 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <templates xml:space="preserve">
     <t t-name="customer_chat.ChatWidget" owl="1">
         <div class="chat-widget">
             <div class="chat-header">
                 <span>Customer Chat</span>
-            </div>
-            <div class="chat-sessions">
-                <t t-foreach="sessions" t-as="session" t-key="session.id">
-                    <div t-att-class="'chat-session ' + (session.id == currentSessionId ? 'active' : '')"
-                        t-on-click="selectSession(session.id)">
-                        <span><t t-esc="session.customer_name"/></span>
-                    </div>
-                </t>
+                <button class="close-chat" t-on-click="toggleChat">×</button>
             </div>
             <div class="chat-body">
-                <t t-foreach="messages" t-as="msg" t-key="msg.id">
-                    <div t-att-class="'chat-message ' + (msg.sender_id == user.id ? 'sent' : 'received')">
+                <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                    <div>
                         <span><t t-esc="msg.message"/></span>
                     </div>
                 </t>
             </div>
             <div class="chat-footer">
-                <input type="text" t-model="newMessage" placeholder="Type a message..."
-                    t-on-keydown="sendMessage"/>
+                <input type="text" t-model="state.newMessage"
+                       placeholder="Type a message..."
+                       t-on-keydown="sendMessage"/>
+                <button class="send-btn" t-on-click="sendMessage">Send</button>
             </div>
         </div>
     </t>

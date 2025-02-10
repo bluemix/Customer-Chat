@@ -6,8 +6,6 @@
             <form string="Chat Session">
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="customer_id"/>
                         <field name="agent_id"/>
                         <field name="state"/>
                     </group>

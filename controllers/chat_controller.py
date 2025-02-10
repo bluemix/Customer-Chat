@@ -1,43 +1,64 @@
 # -*- coding: utf-8 -*-
 from odoo import http
 from odoo.http import request
+import logging
+
+_logger = logging.getLogger(__name__)
+
+# class ChatPortal(http.Controller):
+#
+#     @http.route('/chat', type='http', auth='public', website=True)
+#     def chat_page(self):
+#         return request.render('customer_chat.chat_page_template', {
+#             "use_invoice_terms": "yes, use invoice terms"
+#         })
 
 
 class ChatController(http.Controller):
 
-    @http.route('/chat/start', type='json', auth='user')
-    def start_chat(self, customer_id):
+    @http.route('/chat', type='http', auth='public', website=True)
+    def start_chat(self):
         """Start or retrieve an existing chat session for the customer"""
-        session = request.env['customer.chat.session'].sudo().create_session(customer_id)
-        return {"success": True, "session_id": session.id}
+        _logger.info(f'start_chat, request.session.sid: {request.session.sid}')
+        session = request.env['customer.chat.session'].sudo().create_session(request.session.sid)
+        _logger.info(f'start_chat, session: {session}')
 
-    @http.route('/chat/send', type='json', auth='user')
+        return request.render('customer_chat.chat_page_template', {
+            'session_id': session.id
+        })
+
+
+    @http.route('/chat/send', type='json', auth='public')
     def send_message(self, session_id, message):
-        """Send a message and assign an agent if not assigned"""
-        session = request.env['customer.chat.session'].sudo().browse(session_id)
+        session = request.env['customer.chat.session'].browse(session_id)
         if session:
-            if not session.agent_id and request.env.user.has_group('base.group_user'):
-                session.agent_id = request.env.user.id  # Assign the agent on first response
-
-            chat_msg = request.env['customer.chat.message'].sudo().create({
+            chat_msg = request.env['customer.chat.message'].create({
                 'session_id': session_id,
                 'sender_id': request.env.user.id,
                 'message': message
             })
-            chat_msg.send_chat_message()
-            return {"success": True, "message_id": chat_msg.id}
-        return {"success": False, "error": "Invalid session"}
+            return {'success': True, 'message': chat_msg}
+        return {'success': False, 'error': 'Invalid session'}
 
-    @http.route('/chat/sessions', type='json', auth='user')
+    @http.route('/chat/messages/<int:session_id>', type='json', auth='public')
+    def get_messages(self, session_id):
+        _logger.info(f'get_messages, session_id: {session_id}')
+
+        session = request.env['customer.chat.session'].browse(session_id)
+        if session:
+            messages = session.message_ids.read(['sender_id', 'message', 'timestamp'])
+            return {'success': True, 'messages': messages}
+        return {'success': False, 'error': 'Invalid session'}
+
+    @http.route('/chat/session', type='json', auth='public')
     def get_sessions(self):
-        """Retrieve all active chat sessions"""
-        sessions = request.env['customer.chat.session'].sudo().search([('state', '=', 'open')])
+        """Retrieve active chat session"""
+        session = (request.env['customer.chat.session'].sudo()
+                    .search([('state', '=', 'open'),
+                             ('client_session_id', '=', request.session.sid),]))
+        _logger.info(f'get_sessions, session: {session}')
+
         return {
-            "success": True,
-            "sessions": [{
-                "id": session.id,
-                "name": session.name,
-                "customer_id": session.customer_id.id,
-                "customer_name": session.customer_id.name
-            } for session in sessions]
+            'success': True,
+            'session': session.id
         }

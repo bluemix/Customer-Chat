@@ -1,64 +1,83 @@
 /** @odoo-module **/
+import {registry} from "@web/core/registry";
+import {Component, useState, useRef, onMounted} from "@odoo/owl";
+import {useService} from "@web/core/utils/hooks";
 
-import { Component, useState, onMounted } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import {EventBus} from "@odoo/owl";
 
 export class ChatWidget extends Component {
     setup() {
-        this.rpc = useService("rpc");
-        this.bus = useService("bus_service");
+        this.rpc = useService('rpc');
+        this.bus = new EventBus();
+
+        console.log('ChatWidget setup ...')
+        console.log('ChatWidget setup, this.props: ' + this.props)
+        console.log('ChatWidget setup, JSON.stringify(this.props): ' + JSON.stringify(this.props))
+        console.log('ChatWidget setup, this.props.session_data: ' + this.props.session_id)
+
         this.state = useState({
-            sessions: [],
-            currentSessionId: null,
+            session_id: this.props['session_id'],
             messages: [],
             newMessage: "",
-            user: odoo.session_info.user_id
         });
+        console.log('ChatWidget setup, this.state.session_id: ' + this.state.session_id)
 
         onMounted(() => {
-            this.loadSessions();
-            this.listenForNewMessages();
+            this.selectSession(this.state.session_id);
+            // this.listenForNewMessages();
         });
     }
 
-    async loadSessions() {
-        let result = await this.rpc("/chat/sessions");
-        if (result.success) {
-            this.state.sessions = result.sessions;
-            if (result.sessions.length > 0) {
-                this.selectSession(result.sessions[0].id);
-            }
-        }
-    }
+    // async loadSession() {
+    //     let result = await this.rpc('/chat/session');
+    //     console.log('loadSession, result: ' + result)
+    //
+    //     if (result.success) {
+    //         this.state.session = result.session;
+    //         await this.selectSession(result.session.id);
+    //     }
+    // }
 
     async selectSession(sessionId) {
-        this.state.currentSessionId = sessionId;
+        // this.state.currentSessionId = sessionId;
         this.state.messages = [];
 
         let result = await this.rpc(`/chat/messages/${sessionId}`);
+        console.log('selectSession, result: ' + result)
+        console.log('selectSession, JSON.stringify(result): ' + JSON.stringify(result))
         if (result.success) {
             this.state.messages = result.messages;
         }
     }
 
     async sendMessage(event) {
-        if (event.type === "keydown" && event.key !== "Enter") return;
-        if (!this.state.currentSessionId) return;
+        console.log('sendMessage ...')
+
+        if (event.type === 'keydown' && event.key !== 'Enter') return;
+        // if (!this.state.currentSessionId) return;
 
         let message = this.state.newMessage.trim();
         if (!message) return;
 
-        let result = await this.rpc("/chat/send", { session_id: this.state.currentSessionId, message: message });
+        let result = await this.rpc('/chat/send',
+            {session_id: this.state.session_id, message: message});
+        console.log('sendMessage, result: ' + result)
+
         if (result.success) {
+            this.state.messages.push(result.message);
             this.state.newMessage = "";
         }
     }
 
+    toggleChat() {
+        document.querySelector(".chat-widget").classList.toggle("hidden");
+    }
+
     listenForNewMessages() {
-        this.bus.addChannel("customer.chat.session_" + this.state.currentSessionId);
+        this.bus.addChannel(`customer.chat.session_${this.state.currentSessionId}`);
         this.bus.start();
         this.bus.on("new_message", "chat_widget", (data) => {
-            if (data.session_id === this.state.currentSessionId) {
+            if (data.session_id === this.state.session_id) {
                 this.state.messages.push(data);
             }
         });
@@ -66,3 +85,4 @@ export class ChatWidget extends Component {
 }
 
 ChatWidget.template = "customer_chat.ChatWidget";
+registry.category("public_components").add("customer_chat.ChatWidget", ChatWidget);
