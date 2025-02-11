@@ -32,7 +32,7 @@ export class ChatWidget extends Component {
     }
 
     async sendMessage(event) {
-
+        // call the API only when the user presses Enter or Send button
         if (event.type === 'keydown' && event.key !== 'Enter') return;
 
         let message = this.state.newMessage.trim();
@@ -48,12 +48,15 @@ export class ChatWidget extends Component {
     }
 
     scrollToBottom() {
+        // scroll to bottom of the list when a new message is inserted
         if (this.chatBodyRef.el) {
             this.chatBodyRef.el.scrollTop = this.chatBodyRef.el.scrollHeight;
         }
     }
 
     listenForNewMessages() {
+        // when the customer agent sends a message from the backoffice, it will update
+        // `this.state.messages`
         this.bus.addChannel(`customer.chat.session_${this.state.session_id}`);
         this.bus.start();
         this.bus.subscribe("new_message", (data) => {

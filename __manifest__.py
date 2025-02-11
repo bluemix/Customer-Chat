@@ -9,7 +9,7 @@ messages to customer service.''',
     'author': 'Abdulmomen Bsruki',
     'maintainer': 'Abdulmomen Bsruki',
     'website': 'bluemix.me',
-    'depends': ['base', 'mail', 'bus', 'web'],
+    'depends': ['base', 'mail', 'bus', 'web', 'website'],
     'data': [
         'security/ir.model.access.csv',
         'views/chat_page_template.xml',

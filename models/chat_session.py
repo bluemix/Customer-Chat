@@ -18,7 +18,7 @@ class ChatSession(models.Model):
 
     @api.model
     def create_session(self, session_id):
-        """Create a new chat session if one doesn't exist"""
+        """Create a new chat session if it doesn't exist"""
         session = self.search([
             ('client_session_id', '=', session_id),
             ('state', '=', 'open')

@@ -18,7 +18,7 @@ class ChatMessage(models.Model):
         results = super(ChatMessage, self).create(vals)
         for record in results:
             # send message to the customer only when it is not from a public user (or only when it
-            # is sent from an agent (internal user)
+            # is sent from an agent (internal user))
             public_user = self.env.ref('base.public_user')
             if record.sender_id.id != public_user.id:
                 record.send_chat_message()

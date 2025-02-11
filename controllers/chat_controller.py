@@ -15,6 +15,7 @@ class ChatController(http.Controller):
 
     @http.route('/chat/send', type='json', auth='public')
     def send_message(self, session_id, message):
+        """ Will be used by the front-end to send a message from the customer/visitor """
         session = request.env['customer.chat.session'].browse(session_id)
         if session:
             chat_msg = request.env['customer.chat.message'].create({
@@ -30,6 +31,7 @@ class ChatController(http.Controller):
 
     @http.route('/chat/messages/<int:session_id>', type='json', auth='public')
     def get_messages(self, session_id):
+        """ Will be used by the front-end to get messages based on session_id"""
         session = request.env['customer.chat.session'].browse(session_id)
         if session:
             messages = session.message_ids.read(['sender_id', 'message', 'timestamp'])
