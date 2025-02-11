@@ -22,19 +22,20 @@ Multi-channel support that integrates the chat with other communication channels
 > I'll use the term _Backoffice_ to represent Odoo internal usage (e.g. server-side components and administrative interface), and Back-end as a REST-API.
 
 The chat functionality requires the visitors (front-end) to interact with customer service agents (backend),
-and so a required communication between the front-end and the back-end is required.
+and so a required communication between the front-end and the back-end is a necessity.
 
 There are many ways to achieve cross-communication, and one way is by using the `bus` service.
 The general overview of how they're connected is shown below:
 
-![General Overview](docs/customer_chat_technical_diagram.drawio.png)
+<img alt="General Overview" src="docs/customer_chat_technical_diagram.drawio.png" width="400">
+
 
 Owl is communicating with the back-end by means of APIs, and the APIs communicate with the backoffice.
 But, the Bus is also used to communicate directly with Owl to notify when the _agent_ replies to the customer.
 
 A detailed overview is shown below:
 
-![Detailed Overview](docs/customer_chat_detailed_technical_diagram.drawio.png)
+<img alt="Detailed Overview" src="docs/customer_chat_detailed_technical_diagram.drawio.png" width="600">
 
 ### Backoffice 
 
@@ -42,7 +43,7 @@ Here, and in order to keep the solution simple, I've only used two classes to re
 and a message (`customer.chat.message`). Each session model will include the visitor messages and the client session id, so 
 that even when the visitor/user refreshes the page, the messages will be saved and loaded.
 Once navigating to `/chat`, a new `customer.chat.session` is created if the browser session is new.
-When the `agent_id` replies to the visitor, a new `customer.chat.message` is added and sent back to the visitor by means of a `bus`.
+When the `agent_id` replies to the visitor, a new `customer.chat.message` is added and sent back to the visitor by means of the `Bus`.
 
 
 ### Front-end
@@ -94,10 +95,10 @@ How to use this module is shown in the following screenshots. After installing `
 
 Currently, we live in the ChatGPT/LLMs era, which not only serve customer inquires, but also shaping how we interact with our devices and even the Web in general.
 My opinion regarding enhancements to chat software solutions or any other software solution in general, is to respond _fast_ and _accurate_.
-Being _fast_ is a broad criteria to achieve, but that is always a competitive advantage for companies that to work for.
+Being _fast_ is a broad criteria to achieve, but that is always a competitive advantage for software to look for.
 
 The basic functionality of this Chat can be enhanced for a better user experience, both for the visitor and the customer agent.
-Sure, Odoo Live Chat is way advanced than this, and it almost fulfills most users demands. But, from my side, and in addition to 
+Sure, Odoo Live Chat is way advanced than this, and it almost fulfills most users demands. From my side, and in addition to 
 the Odoo Live Chat functionality, I would include AI models to help the visitors about that they need, and automate replies to a 
 certain degree (some cases require customer agent intervention).
 The other enhancement I would like to include is integrating it with a helpdesk system or with a CRM (as mentioned above).
