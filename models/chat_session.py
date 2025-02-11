@@ -7,7 +7,7 @@ class ChatSession(models.Model):
     _order = "create_date desc"
 
     client_session_id = fields.Char('Client Session ID')
-    agent_id = fields.Many2one("res.users", string="Support Agent", default=None)
+    agent_id = fields.Many2one("res.users", string='Support Agent', default=None)
     message_ids = fields.One2many('customer.chat.message',
                                   'session_id',
                                   string='Messages')

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields
+from odoo import models, fields, api
 
 class ChatMessage(models.Model):
     _name = 'customer.chat.message'
@@ -7,9 +7,18 @@ class ChatMessage(models.Model):
     _order = 'timestamp asc'
 
     session_id = fields.Many2one('customer.chat.session', string='Chat Session', required=True, ondelete='cascade')
-    sender_id = fields.Many2one('res.users', string='Sender', required=True, ondelete='cascade')
+    sender_id = fields.Many2one('res.users', string='Sender',
+                                default=lambda self: self.env.user,
+                                required=True, ondelete='cascade')
     message = fields.Text('Message', required=True)
     timestamp = fields.Datetime('Timestamp', default=fields.Datetime.now, required=True, index=True)
+
+    # @api.model_create_multi
+    # def create(self, vals):
+    #     results = super(ChatMessage, self).create(vals)
+    #     for record in results:
+    #         if record.sender_id
+    #     return results
 
     def send_chat_message(self):
         """Send message via Odoo 17's Bus Service"""

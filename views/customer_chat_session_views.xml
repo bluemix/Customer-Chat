@@ -1,4 +1,18 @@
 <odoo>
+
+    <!--    TREE VIEW   -->
+    <record id="view_chat_session_tree" model="ir.ui.view">
+        <field name="name">Chat Session Tree</field>
+        <field name="model">customer.chat.session</field>
+        <field name="arch" type="xml">
+            <tree string="Chat Session">
+                <field name="message_ids"/>
+                <field name="agent_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <!--    FORM VIEW   -->
     <record id="view_chat_session_form" model="ir.ui.view">
         <field name="name">Chat Session Form</field>
         <field name="model">customer.chat.session</field>
@@ -11,11 +25,11 @@
                     </group>
                     <notebook>
                         <page string="Messages">
-                            <field name="message_ids">
-                                <tree>
-                                    <field name="sender_id"/>
-                                    <field name="message"/>
-                                    <field name="timestamp"/>
+                            <field name="message_ids" context="{'default_session_id': id}">
+                                <tree default_order="timestamp asc" editable="bottom">
+                                    <field name="sender_id" required="1"/>
+                                    <field name="message" required="1"/>/>
+                                    <field name="timestamp" />
                                 </tree>
                             </field>
                         </page>
@@ -24,4 +38,23 @@
             </form>
         </field>
     </record>
+
+    <!--    MENUS-->
+    <!-- Define the Main Menu for Customer Chat -->
+    <menuitem id="menu_customer_chat_root" name="Customer Chat" sequence="10"/>
+
+    <!-- Action for Chat Sessions -->
+    <record id="action_customer_chat_sessions" model="ir.actions.act_window">
+        <field name="name">Chat Sessions</field>
+        <field name="res_model">customer.chat.session</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Sub-menu for Chat Sessions -->
+    <menuitem id="menu_customer_chat_sessions"
+              name="Chat Sessions"
+              parent="menu_customer_chat_root"
+              action="action_customer_chat_sessions"
+              sequence="20"/>
+
+
 </odoo>

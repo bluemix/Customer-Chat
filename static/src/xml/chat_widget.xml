@@ -6,13 +6,13 @@
                 <span>Customer Chat</span>
                 <button class="close-chat" t-on-click="toggleChat">×</button>
             </div>
-            <div class="chat-body">
+            <ul class="chat-body">
                 <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
-                    <div>
+                    <li>
                         <span><t t-esc="msg.message"/></span>
-                    </div>
+                    </li>
                 </t>
-            </div>
+            </ul>
             <div class="chat-footer">
                 <input type="text" t-model="state.newMessage"
                        placeholder="Type a message..."

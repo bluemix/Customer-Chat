@@ -7,6 +7,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  z-index: 9999;
 
   .chat-header {
     background: #007bff;
@@ -23,7 +24,17 @@
     overflow-y: auto;
     padding: 10px;
     background: #f8f9fa;
+    //list-style: none; /* Removes bullets */
   }
+
+//  .chat-body li {
+//    list-style-type: none; /* Ensures no bullets */
+//    padding: 8px;
+//    margin: 5px 0;
+//    border-radius: 5px;
+//    width: fit-content;
+//    max-width: 80%;
+//}
 
   .chat-message {
     padding: 8px;

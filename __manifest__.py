@@ -12,7 +12,7 @@ messages to customer service.''',
     'depends': ['base', 'mail', 'bus', 'web', 'website'],
     'data': [
         'security/ir.model.access.csv',
-        'views/chat_views.xml',
+        'views/chat_page_template.xml',
         'views/customer_chat_session_views.xml',
     ],
     'assets': {
