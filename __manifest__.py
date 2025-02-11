@@ -20,6 +20,9 @@ messages to customer service.''',
             "customer_chat/static/src/xml/chat_widget.xml",
             "customer_chat/static/src/js/chat_widget.js",
             "customer_chat/static/src/scss/chat_widget.scss",
+        ],
+        "web.assets_tests": [
+            "customer_chat/static/tests/chat_widget_tests.js",
         ]
     },
     'license': 'AGPL-3',
