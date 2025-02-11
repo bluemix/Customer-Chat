@@ -4,12 +4,14 @@
         <div class="chat-widget">
             <div class="chat-header">
                 <span>Customer Chat</span>
-                <button class="close-chat" t-on-click="toggleChat">×</button>
             </div>
-            <ul class="chat-body">
+            <ul class="chat-body" t-ref="chat-body">
                 <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
-                    <li>
-                        <span><t t-esc="msg.message"/></span>
+                    <li t-att-class="'chat-message card ' + (msg.sender_id[0] === 4 ? 'sent' : 'received')">
+                        <div class="card-body">
+                            <p class="card-text"><t t-esc="msg.message"/></p>
+                            <small class="timestamp"><t t-esc="msg.timestamp"/></small>
+                        </div>
                     </li>
                 </t>
             </ul>

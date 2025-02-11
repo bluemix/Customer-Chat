@@ -37,7 +37,10 @@ class ChatController(http.Controller):
                 'sender_id': request.env.user.id,
                 'message': message
             })
-            return {'success': True, 'message': chat_msg}
+            # `read` will return result in an array, so there will be index 0 here
+            message_json = chat_msg.read(['sender_id', 'message', 'timestamp'])[0]
+            return {'success': True,
+                    'message': message_json}
         return {'success': False, 'error': 'Invalid session'}
 
     @http.route('/chat/messages/<int:session_id>', type='json', auth='public')

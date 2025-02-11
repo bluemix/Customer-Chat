@@ -6,9 +6,10 @@ import {useService} from "@web/core/utils/hooks";
 import {EventBus} from "@odoo/owl";
 
 export class ChatWidget extends Component {
+
     setup() {
         this.rpc = useService('rpc');
-        this.bus = new EventBus();
+        this.bus = this.env.services.bus_service;
         this.chatBodyRef = useRef("chat-body");  // Reference to the chat list
         console.log('ChatWidget setup ...')
         console.log('ChatWidget setup, this.props: ' + this.props)
@@ -24,7 +25,7 @@ export class ChatWidget extends Component {
 
         onMounted(() => {
             this.selectSession(this.state.session_id);
-            // this.listenForNewMessages();
+            this.listenForNewMessages();
         });
         onPatched(() => {
             this.scrollToBottom();  // Ensure new messages scroll into view
@@ -67,15 +68,12 @@ export class ChatWidget extends Component {
         console.log('sendMessage, JSON.stringify(result): ' + JSON.stringify(result))
 
         if (result.success) {
+            console.log('sendMessage, JSON.stringify(result.message): ' + JSON.stringify(result.message))
             // this.state.messages = [...this.state.messages, result.message];
             this.state.messages.push(result.message);
             this.state.newMessage = "";
-            this.scrollToBottom()
+            // this.scrollToBottom()
         }
-    }
-
-    toggleChat() {
-        document.querySelector(".chat-widget").classList.toggle("hidden");
     }
 
     scrollToBottom() {
@@ -86,10 +84,13 @@ export class ChatWidget extends Component {
     }
 
     listenForNewMessages() {
-        this.bus.addChannel(`customer.chat.session_${this.state.currentSessionId}`);
+        this.bus.addChannel(`customer.chat.session_${this.state.session_id}`);
         this.bus.start();
-        this.bus.on("new_message", "chat_widget", (data) => {
+        this.bus.subscribe("new_message", (data) => {
+            console.log('listenForNewMessages, data.session_id === this.state.session_id: ' + data.session_id === this.state.session_id);
+
             if (data.session_id === this.state.session_id) {
+                console.log('listenForNewMessages, will insert message: ' + JSON.stringify(data));
                 this.state.messages.push(data);
             }
         });

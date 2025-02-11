@@ -13,15 +13,19 @@ class ChatMessage(models.Model):
     message = fields.Text('Message', required=True)
     timestamp = fields.Datetime('Timestamp', default=fields.Datetime.now, required=True, index=True)
 
-    # @api.model_create_multi
-    # def create(self, vals):
-    #     results = super(ChatMessage, self).create(vals)
-    #     for record in results:
-    #         if record.sender_id
-    #     return results
+    @api.model_create_multi
+    def create(self, vals):
+        results = super(ChatMessage, self).create(vals)
+        for record in results:
+            # send message to the customer only when it is not from a public user (or only when it
+            # is sent from an agent (internal user)
+            public_user = self.env.ref('base.public_user')
+            if record.sender_id.id != public_user.id:
+                record.send_chat_message()
+        return results
 
     def send_chat_message(self):
-        """Send message via Odoo 17's Bus Service"""
+        """Send message via the bus service to the front-end (customer)"""
         self.env['bus.bus']._sendone(
             f'customer.chat.session_{self.session_id.id}',
             'new_message',
