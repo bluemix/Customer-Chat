@@ -9,18 +9,13 @@ messages to customer service.''',
     'author': 'Abdulmomen Bsruki',
     'maintainer': 'Abdulmomen Bsruki',
     'website': 'bluemix.me',
-    'depends': ['base', 'mail', 'bus', 'web', 'website'],
+    'depends': ['base', 'mail', 'bus', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'views/chat_page_template.xml',
         'views/customer_chat_session_views.xml',
     ],
     'assets': {
-        # 'web.assets_backend': [
-        #     'customer_chat/static/src/xml/chat_widget.xml',
-        #     'customer_chat/static/src/js/chat_widget.js',
-        #     'customer_chat/static/src/scss/chat_widget.scss',
-        # ],
         "web.assets_frontend": [
             "customer_chat/static/src/xml/chat_widget.xml",
             "customer_chat/static/src/js/chat_widget.js",
